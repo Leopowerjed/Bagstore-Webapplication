@@ -1,0 +1,78 @@
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Segoe UI , Tahoma , Geneva, Verdana, sans-serif';
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+}
+
+nav{
+    background: rgba(225, 225, 225 , 0.95);
+    backdrop-filter: blur(10px);
+    padding: 25px 40px ;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid #667eea;
+}
+
+nav h1{
+    font-size: 32px;
+    font-weight:700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;    
+    background-clip: text;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+.menu-bar{
+    background: rgba(225, 225, 225 , 0.95);
+    padding: 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08) ;
+}
+.menu-bar ul{
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+.menu-bar li{
+    padding: 0;
+}
+.menu-bar a{
+    display: block;
+    padding: 18px 40px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.menu-bar a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+.menu-bar a:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+}
+
+.menu-bar a:hover::before {
+    width: 80%;
+}
+
+
