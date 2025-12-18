@@ -7,9 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="navbar"></div>
+    <header id="navbar"></header>
+    <main class="container">
+        <section class="page-header">
+            <div class="page-header-top">
+                <h2>📦 สรุปปริมาณถุง,PR และ PO </h2>
+                <div class="filter-box">
+                    <select id="bagTypeFilter">
+                    <option value="">ทุกประเภท</option>
+                    <option value="cement-paper">1. ถุง Cement กระดาษ</option>
+                    <option value="cement-pp">2. ถุง Cement PP</option>
+                    <option value="cement-pp-paper">3. ถุง Cement PP+กระดาษ</option>
+                    <option value="mortar-paper">4. ถุง Mortar กระดาษ</option>
+                    <option value="mortar-pp">5. ถุง Mortar PP</option>
+                    <option value="mortar-film">6. ถุง Mortar Film</option>
+                    <option value="fertilizer">7. ถุงปุ๋ย</option>
+                </div>
+                </select>
+            </div>
+        </section>
+    </main>
+
 
     <script src="js/navbar.js"></script>
+    <script src="js/bag.js"></script>
 
 </body>
 </html>

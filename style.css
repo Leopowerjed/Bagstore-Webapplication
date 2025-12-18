@@ -75,4 +75,22 @@ nav h1{
     width: 80%;
 }
 
+/*Container*/
 
+.container{
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 20px 20px;  
+}
+.page-header {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+}
+
+.page-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
