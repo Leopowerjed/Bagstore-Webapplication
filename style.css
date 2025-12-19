@@ -83,9 +83,17 @@ nav h1{
     padding: 20px 20px;  
 }
 .page-header {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+.page-header h2 {
+    font-size: 25px;
+    margin-bottom: 20px;
+    font-weight: 700;
 }
 
 .filter-box {
@@ -117,4 +125,12 @@ nav h1{
     padding: 20px;
     border-radius: 15px;
     text-align: center;
+}
+.alert-panel{
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+
 }
