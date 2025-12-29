@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "2VwIYOidiG1kIEW/epumQKKWJPwSu3/700JXaPOThqw=",
+  "Source": "BagstoreBackend",
+  "BasePath": "_content/BagstoreBackend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
