@@ -57,26 +57,37 @@
             </section>
         </section>
 
-        <!-- Table Placeholder (Example for future dynamic content) -->
+        <!-- Table Placeholder -->
         <section class="table-container">
-            <h3>📊 รายการสินค้าคงคลัง</h3>
+            <div class="page-header-top" style="margin-bottom: 15px;">
+                <h3>📊 รายการสินค้าคงคลัง</h3>
+                <div class="filter-box">
+                    <select id="inventoryCategoryFilter">
+                        <option value="">✨ ดูทั้งหมด (All Categories)</option>
+                        <option value="cement-paper">1. ถุง Cement กระดาษ</option>
+                        <option value="cement-pp">2. ถุง Cement PP</option>
+                        <option value="cement-pp-paper">3. ถุง Cement PP+กระดาษ</option>
+                        <option value="mortar-paper">4. ถุง Mortar กระดาษ</option>
+                        <option value="mortar-pp">5. ถุง Mortar PP</option>
+                        <option value="mortar-film">6. ถุง Mortar Film</option>
+                        <option value="fertilizer">7. ถุงปุ๋ย</option>
+                    </select>
+                </div>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="inventoryTable">
                     <thead>
                         <tr>
                             <th>รหัสสินค้า</th>
                             <th>รายการ</th>
-                            <th>ประเภท</th>
                             <th>คงเหลือ (On-hand)</th>
+                            <th>PR (Requisition)</th>
+                            <th>PO (Order)</th>
                             <th>สถานะ</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Mock Data for Display (Will be replaced by JS) -->
-                        <tr>
-                            <td>-</td>
-                            <td colspan="4" style="text-align:center;">กำลังโหลดข้อมูล...</td>
-                        </tr>
+                        <!-- Data will be loaded via JS -->
                     </tbody>
                 </table>
             </div>
