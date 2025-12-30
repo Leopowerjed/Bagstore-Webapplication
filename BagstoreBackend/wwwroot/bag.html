@@ -10,22 +10,13 @@
 
 <body>
     <header id="navbar"></header>
-
     <main class="container">
-
-        <!-- Alerts -->
-        <section class="alert-panel" style="display: none;" id="alertBox">
-            <h3>🔔 การแจ้งเตือน</h3>
-            <div id="alertContent"></div>
-        </section>
-
-        <!-- Summary Statistics -->
         <section class="page-header">
             <div class="page-header-top">
-                <h2>📦 สรุปปริมาณถุง (PR & PO)</h2>
+                <h2>📦 สรุปปริมาณถุง,PR และ PO </h2>
                 <div class="filter-box">
                     <select id="bagTypeFilter">
-                        <option value="">✨ ดูทั้งหมด (All Categories)</option>
+                        <option value="">ทุกประเภท</option>
                         <option value="cement-paper">1. ถุง Cement กระดาษ</option>
                         <option value="cement-pp">2. ถุง Cement PP</option>
                         <option value="cement-pp-paper">3. ถุง Cement PP+กระดาษ</option>
@@ -36,7 +27,6 @@
                     </select>
                 </div>
             </div>
-
             <section class="stat">
                 <div class="stat-card">
                     <div class="lable">On-hand รวม</div>
@@ -50,42 +40,43 @@
                     <div class="lable">PO รวม</div>
                     <div class="value" id="totalPO">0</div>
                 </div>
-                <div class="stat-card" style="border-left: 4px solid #7c3aed;">
+                <div class="stat-card">
                     <div class="lable">รวมทั้งหมด</div>
-                    <div class="value" id="grandTotal" style="color: #7c3aed;">0</div>
+                    <div class="value" id="grandTotal">0</div>
                 </div>
             </section>
         </section>
 
-        <!-- Table Placeholder (Example for future dynamic content) -->
+        <!-- New Table Section -->
         <section class="table-container">
-            <h3>📊 รายการสินค้าคงคลัง</h3>
-            <div style="overflow-x: auto;">
-                <table class="data-table" id="inventoryTable">
-                    <thead>
-                        <tr>
-                            <th>รหัสสินค้า</th>
-                            <th>รายการ</th>
-                            <th>ประเภท</th>
-                            <th>คงเหลือ (On-hand)</th>
-                            <th>สถานะ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Mock Data for Display (Will be replaced by JS) -->
-                        <tr>
-                            <td>-</td>
-                            <td colspan="4" style="text-align:center;">กำลังโหลดข้อมูล...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <h3>รายการสินค้าคงคลัง (Inventory)</h3>
+            <table class="data-table" id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>รหัสสินค้า (Part No)</th>
+                        <th>รายละเอียด (Description)</th>
+                        <th>กลุ่ม (Family)</th>
+                        <th>ประเภทวัสดุ (Material)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS will load data here -->
+                </tbody>
+            </table>
+        </section>
+        <section class=" alert-panel">
+            <h3>🔔 การแจ้งเตือน</h3>
         </section>
 
     </main>
+    >
+
+
+
 
     <script src="js/navbar.js"></script>
     <script src="js/bag.js"></script>
+
 </body>
 
 </html>

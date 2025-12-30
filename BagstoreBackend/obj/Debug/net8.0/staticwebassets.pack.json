@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\bag.html",
+      "PackagePath": "staticwebassets\\bag.html"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\bigbag.html",
+      "PackagePath": "staticwebassets\\bigbag.html"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\js\\bag.js",
+      "PackagePath": "staticwebassets\\js\\bag.js"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\js\\navbar.js",
+      "PackagePath": "staticwebassets\\js\\navbar.js"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\navbar.html",
+      "PackagePath": "staticwebassets\\navbar.html"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\pallet.html",
+      "PackagePath": "staticwebassets\\pallet.html"
+    },
+    {
+      "Id": "D:\\myhtmlproject\\Bagstore Webapplication\\templates\\BagstoreBackend\\wwwroot\\style.css",
+      "PackagePath": "staticwebassets\\style.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.BagstoreBackend.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.BagstoreBackend.props",
+      "PackagePath": "build\\BagstoreBackend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.BagstoreBackend.props",
+      "PackagePath": "buildMultiTargeting\\BagstoreBackend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.BagstoreBackend.props",
+      "PackagePath": "buildTransitive\\BagstoreBackend.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

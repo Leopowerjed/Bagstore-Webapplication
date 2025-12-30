@@ -22,3 +22,4 @@ D:\myhtmlproject\Bagstore Webapplication\templates\BagstoreBackend\obj\Debug\net
 D:\myhtmlproject\Bagstore Webapplication\templates\BagstoreBackend\obj\Debug\net8.0\BagstoreBackend.pdb
 D:\myhtmlproject\Bagstore Webapplication\templates\BagstoreBackend\obj\Debug\net8.0\BagstoreBackend.genruntimeconfig.cache
 D:\myhtmlproject\Bagstore Webapplication\templates\BagstoreBackend\obj\Debug\net8.0\ref\BagstoreBackend.dll
+D:\myhtmlproject\Bagstore Webapplication\templates\BagstoreBackend\bin\Debug\net8.0\BagstoreBackend.staticwebassets.runtime.json
