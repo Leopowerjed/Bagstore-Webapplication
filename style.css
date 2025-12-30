@@ -436,6 +436,35 @@ nav p {
     display: inline-block;
 }
 
+/* Clickable PR & PO */
+.pr-link,
+.po-link {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.pr-link {
+    color: #2563eb;
+}
+
+.pr-link:hover {
+    color: #1d4ed8;
+    transform: scale(1.1);
+}
+
+.po-link {
+    color: #7c3aed;
+}
+
+.po-link:hover {
+    color: #6d28d9;
+    transform: scale(1.1);
+}
+
 @media (max-width: 768px) {
 
     /* ... existing mobile styles ... */

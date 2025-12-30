@@ -10,10 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const grandTotalElem = document.getElementById('grandTotal');
 
     const locationModal = document.getElementById('locationModal');
+    const prModal = document.getElementById('prModal');
+    const poModal = document.getElementById('poModal');
+
     const locationTableBody = document.querySelector('#locationTable tbody');
+    const prTableBody = document.querySelector('#prTable tbody');
+    const poTableBody = document.querySelector('#poTable tbody');
+
     const modalPartNo = document.getElementById('modalPartNo');
     const modalPartDesc = document.getElementById('modalPartDesc');
-    const closeBtn = document.querySelector('.close-btn');
 
     // Function to fetch and update inventory
     async function fetchInventory(category) {
@@ -59,20 +64,48 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${Math.round(item.TOTAL_ONHAND || 0).toLocaleString()}
                     </span>
                 </td>
-                <td style="color:#2563eb;">${Math.round(item.TOTAL_PR || 0).toLocaleString()}</td>
-                <td style="color:#7c3aed;">${Math.round(item.TOTAL_PO || 0).toLocaleString()}</td>
+                <td>
+                    <span class="pr-link" 
+                          data-part-no="${item.PART_NO}" 
+                          data-desc="${item.DESCRIPTION || ''}">
+                        ${Math.round(item.TOTAL_PR || 0).toLocaleString()}
+                    </span>
+                </td>
+                <td>
+                    <span class="po-link" 
+                          data-part-no="${item.PART_NO}" 
+                          data-desc="${item.DESCRIPTION || ''}">
+                        ${Math.round(item.TOTAL_PO || 0).toLocaleString()}
+                    </span>
+                </td>
                 <td><span class="badge ${(parseFloat(item.TOTAL_ONHAND) + parseFloat(item.TOTAL_PR) + parseFloat(item.TOTAL_PO)) > 0 ? 'success' : 'warning'}">
                     ${(parseFloat(item.TOTAL_ONHAND) + parseFloat(item.TOTAL_PR) + parseFloat(item.TOTAL_PO)) > 0 ? 'Active' : 'Empty'}
                 </span></td>
             </tr>
         `).join('');
 
-        // Add event listeners to on-hand links
+        // Add event listeners
         document.querySelectorAll('.on-hand-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 const partNo = e.target.getAttribute('data-part-no');
                 const desc = e.target.getAttribute('data-desc');
                 showLocationDetail(partNo, desc);
+            });
+        });
+
+        document.querySelectorAll('.pr-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const partNo = e.target.getAttribute('data-part-no');
+                const desc = e.target.getAttribute('data-desc');
+                showPRDetail(partNo, desc);
+            });
+        });
+
+        document.querySelectorAll('.po-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const partNo = e.target.getAttribute('data-part-no');
+                const desc = e.target.getAttribute('data-desc');
+                showPODetail(partNo, desc);
             });
         });
     }
@@ -107,6 +140,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function showPRDetail(partNo, desc) {
+        const modalPartNoPr = document.querySelector('.pr-part-no');
+        const modalPartDescPr = document.querySelector('.pr-part-desc');
+        modalPartNoPr.textContent = partNo;
+        modalPartDescPr.textContent = desc;
+        prTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+        prModal.style.display = 'block';
+
+        try {
+            const response = await fetch(`api/get_inventory_pr_details.php?part_no=${encodeURIComponent(partNo)}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    prTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ไม่พบรายการ PR</td></tr>';
+                } else {
+                    prTableBody.innerHTML = result.data.map(row => `
+                        <tr>
+                            <td style="font-family:monospace;">${row.REQUISITION_NO}</td>
+                            <td style="font-size:13px; color:var(--text-secondary);">${formatDate(row.REQUISITION_DATE)}</td>
+                            <td><span class="badge warning">${row.STATE}</span></td>
+                            <td style="text-align:right; font-weight:700;">${Math.round(row.ORIGINAL_QTY).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            } else {
+                prTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error: ${result.message}</td></tr>`;
+            }
+        } catch (error) {
+            prTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">ไม่สามารถเชื่อมต่อ API ได้</td></tr>';
+        }
+    }
+
+    async function showPODetail(partNo, desc) {
+        const modalPartNoPo = document.querySelector('.po-part-no');
+        const modalPartDescPo = document.querySelector('.po-part-desc');
+        modalPartNoPo.textContent = partNo;
+        modalPartDescPo.textContent = desc;
+        poTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+        poModal.style.display = 'block';
+
+        try {
+            const response = await fetch(`api/get_inventory_po_details.php?part_no=${encodeURIComponent(partNo)}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    poTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่พบรายการ PO</td></tr>';
+                } else {
+                    poTableBody.innerHTML = result.data.map(row => `
+                        <tr>
+                            <td style="font-family:monospace;">${row.ORDER_NO}</td>
+                            <td style="font-size:13px; color:var(--text-secondary);">${formatDate(row.ORDER_DATE)}</td>
+                            <td><span class="badge success">${row.STATE}</span></td>
+                            <td style="text-align:right;">${Math.round(row.BUY_QTY_DUE).toLocaleString()}</td>
+                            <td style="text-align:right; font-weight:700; color:var(--accent-color);">${Math.round(row.BALANCE).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            } else {
+                poTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${result.message}</td></tr>`;
+            }
+        } catch (error) {
+            poTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">ไม่สามารถเชื่อมต่อ API ได้</td></tr>';
+        }
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
     function updateSummary(summary) {
         if (!summary) return;
 
@@ -117,10 +227,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Modal Close logic
-    closeBtn.onclick = () => locationModal.style.display = 'none';
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = () => {
+            const modalId = btn.getAttribute('data-modal') || 'locationModal';
+            document.getElementById(modalId).style.display = 'none';
+        };
+    });
+
     window.onclick = (e) => {
-        if (e.target == locationModal) locationModal.style.display = 'none';
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
     }
+
 
     // sync filters if one changes (optional design choice)
     inventoryFilter.addEventListener('change', (e) => {

@@ -100,7 +100,7 @@
             <div class="modal-content glass">
                 <div class="modal-header">
                     <h3>📍 รายละเอียดแยกตาม Location</h3>
-                    <span class="close-btn">&times;</span>
+                    <span class="close-btn" data-modal="locationModal">&times;</span>
                 </div>
                 <div class="modal-body">
                     <div class="part-info">
@@ -118,6 +118,61 @@
                         <tbody>
                             <!-- Location data will be loaded here -->
                         </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PR Detail Modal -->
+        <div id="prModal" class="modal">
+            <div class="modal-content glass">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);">
+                    <h3>📝 รายละเอียด PR (Requisition)</h3>
+                    <span class="close-btn" data-modal="prModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="part-info">
+                        <span class="modal-part-no pr-part-no"></span>
+                        <p class="modal-part-desc pr-part-desc"></p>
+                    </div>
+                    <table class="data-table small" id="prTable">
+                        <thead>
+                            <tr>
+                                <th>PR No</th>
+                                <th>วันที่เปิด</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">จำนวน</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PO Detail Modal -->
+        <div id="poModal" class="modal">
+            <div class="modal-content glass">
+                <div class="modal-header" style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);">
+                    <h3>🛒 รายละเอียด PO (Order)</h3>
+                    <span class="close-btn" data-modal="poModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="part-info">
+                        <span class="modal-part-no po-part-no"></span>
+                        <p class="modal-part-desc po-part-desc"></p>
+                    </div>
+                    <table class="data-table small" id="poTable">
+                        <thead>
+                            <tr>
+                                <th>PO No</th>
+                                <th>วันที่เปิด</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">ยอดเต็ม</th>
+                                <th style="text-align:right;">คงเหลือ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
