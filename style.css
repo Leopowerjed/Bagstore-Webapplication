@@ -274,6 +274,17 @@ nav p {
     transition: background-color 0.2s;
 }
 
+/* Part No Column - Force Single Line */
+#inventoryTable th:first-child,
+#inventoryTable td.part-no {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    min-width: 220px !important;
+    width: 220px !important;
+    display: table-cell !important;
+}
+
 .data-table tbody tr:hover td {
     background-color: #f8fafc;
 }

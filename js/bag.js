@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to fetch and update inventory
     async function fetchInventory(category) {
-        inventoryTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+        inventoryTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
 
         try {
             const response = await fetch(`api/get_inventory.php?category=${category}`);
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.status === 'success') {
                 updateTable(result.data);
-                updateSummary(result.data);
+                updateSummary(result.summary);
             } else {
                 throw new Error(result.message);
             }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         inventoryTableBody.innerHTML = data.map(item => `
             <tr>
-                <td>${item.PART_NO}</td>
+                <td class="part-no">${item.PART_NO}</td>
                 <td>${item.DESCRIPTION || '-'}</td>
                 <td style="font-weight:bold;">${Math.round(item.TOTAL_ONHAND || 0).toLocaleString()}</td>
                 <td style="color:#2563eb;">${Math.round(item.TOTAL_PR || 0).toLocaleString()}</td>
