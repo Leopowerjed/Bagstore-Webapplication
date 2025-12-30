@@ -25,14 +25,15 @@
                 <h2>📦 สรุปปริมาณถุง (PR & PO)</h2>
                 <div class="filter-box">
                     <select id="bagTypeFilter">
-                        <option value="">✨ ดูทั้งหมด (All Categories)</option>
-                        <option value="cement-paper">1. ถุง Cement กระดาษ</option>
-                        <option value="cement-pp">2. ถุง Cement PP</option>
-                        <option value="cement-pp-paper">3. ถุง Cement PP+กระดาษ</option>
-                        <option value="mortar-paper">4. ถุง Mortar กระดาษ</option>
-                        <option value="mortar-pp">5. ถุง Mortar PP</option>
-                        <option value="mortar-film">6. ถุง Mortar Film</option>
-                        <option value="fertilizer">7. ถุงปุ๋ย</option>
+                        <option value="11">1.) ถุงปูนซีเมนต์ในประเทศ (กระดาษ)</option>
+                        <option value="21">2.) ถุงปูนซีเมนต์ในประเทศ (PP)</option>
+                        <option value="23">3.) ถุงปูนมอร์ตาร์ (PP)</option>
+                        <option value="13">4.) ถุงปูนมอร์ตาร์ (กระดาษ)</option>
+                        <option value="43">5.) ถุงปูนมอร์ตาร์ (ฟิล์ม)</option>
+                        <option value="52">6.) ถุงปูนซีเมนต์ส่งออก (เย็บเชือก)</option>
+                        <option value="32">7.) ถุงปูนซีเมนต์ส่งออก (PP+กระดาษ)</option>
+                        <option value="22">8.) ถุงปูนซีเมนต์ส่งออก (PP)</option>
+                        <option value="33">9.) ถุงปูนมอร์ตาร์ส่งออก (PP+กระดาษ)</option>
                     </select>
                 </div>
             </div>
@@ -63,14 +64,15 @@
                 <h3>📊 รายการสินค้าคงคลัง</h3>
                 <div class="filter-box">
                     <select id="inventoryCategoryFilter">
-                        <option value="">✨ ดูทั้งหมด (All Categories)</option>
-                        <option value="cement-paper">1. ถุง Cement กระดาษ</option>
-                        <option value="cement-pp">2. ถุง Cement PP</option>
-                        <option value="cement-pp-paper">3. ถุง Cement PP+กระดาษ</option>
-                        <option value="mortar-paper">4. ถุง Mortar กระดาษ</option>
-                        <option value="mortar-pp">5. ถุง Mortar PP</option>
-                        <option value="mortar-film">6. ถุง Mortar Film</option>
-                        <option value="fertilizer">7. ถุงปุ๋ย</option>
+                        <option value="11">1.) ถุงปูนซีเมนต์ในประเทศ (กระดาษ)</option>
+                        <option value="21">2.) ถุงปูนซีเมนต์ในประเทศ (PP)</option>
+                        <option value="23">3.) ถุงปูนมอร์ตาร์ (PP)</option>
+                        <option value="13">4.) ถุงปูนมอร์ตาร์ (กระดาษ)</option>
+                        <option value="43">5.) ถุงปูนมอร์ตาร์ (ฟิล์ม)</option>
+                        <option value="52">6.) ถุงปูนซีเมนต์ส่งออก (เย็บเชือก)</option>
+                        <option value="32">7.) ถุงปูนซีเมนต์ส่งออก (PP+กระดาษ)</option>
+                        <option value="22">8.) ถุงปูนซีเมนต์ส่งออก (PP)</option>
+                        <option value="33">9.) ถุงปูนมอร์ตาร์ส่งออก (PP+กระดาษ)</option>
                     </select>
                 </div>
             </div>
@@ -92,6 +94,34 @@
                 </table>
             </div>
         </section>
+
+        <!-- Location Breakdown Modal -->
+        <div id="locationModal" class="modal">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <h3>📍 รายละเอียดแยกตาม Location</h3>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="part-info">
+                        <span id="modalPartNo" class="modal-part-no"></span>
+                        <p id="modalPartDesc" class="modal-part-desc"></p>
+                    </div>
+                    <table class="data-table small" id="locationTable">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>ชื่อ Location</th>
+                                <th>จำนวนคงเหลือ (On-hand)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Location data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
     </main>
 

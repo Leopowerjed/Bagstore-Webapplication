@@ -2,40 +2,32 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/IFSConnection.php';
 
-// Category to Part No Mapping
+// Category to EAN_NO Prefix Mapping
 $mapping = [
-    'all' => ['25A%'],
-    'cement-paper' => ['25A-P%'], // Example sub-patterns if known
-    'cement-pp' => ['25A-PP%'],
-    'cement-pp-paper' => ['25A-CBT%'],
-    'mortar-paper' => ['25A-MP%'],
-    'mortar-pp' => ['25A-MPP%'],
-    'mortar-film' => ['25A-MF%'],
-    'fertilizer' => ['1-220-060%']
+    '11' => '11%',
+    '21' => '21%',
+    '23' => '23%',
+    '13' => '13%',
+    '43' => '43%',
+    '52' => '52%',
+    '32' => '32%',
+    '22' => '22%',
+    '33' => '33%'
 ];
 
-$category = $_GET['category'] ?? 'all';
-if (empty($category))
-    $category = 'all';
+$category = $_GET['category'] ?? '11';
+if (empty($category) || !isset($mapping[$category])) {
+    $category = '11';
+}
 
 $db = new IFSConnection();
 
 try {
     $conn = $db->connect();
 
-    $categoryWhere = "";
-    $params = [];
-
-    if (isset($mapping[$category])) {
-        $patterns = $mapping[$category];
-        $conditions = [];
-        foreach ($patterns as $index => $pattern) {
-            $paramName = "p" . $index;
-            $conditions[] = "p.PART_NO LIKE :" . $paramName;
-            $params[$paramName] = $pattern;
-        }
-        $categoryWhere = "AND (" . implode(" OR ", $conditions) . ")";
-    }
+    // Default part no filter for all bag categories
+    $categoryWhere = "AND p.PART_NO LIKE '25A%' AND p.EAN_NO LIKE :ean";
+    $params = ['ean' => $mapping[$category]];
 
     $sql = "
         SELECT 
@@ -128,7 +120,7 @@ try {
         ) po ON p.PART_NO = po.PART_NO
         WHERE (NVL(s.TOTAL_ONHAND, 0) > 0 OR NVL(pr.TOTAL_PR, 0) > 0 OR NVL(po.TOTAL_PO, 0) > 0)
         $categoryWhere
-        ORDER BY p.PART_NO
+        ORDER BY p.EAN_NO
     ";
 
     // Global limit for initial view

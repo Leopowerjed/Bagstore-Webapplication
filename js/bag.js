@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalPOElem = document.getElementById('totalPO');
     const grandTotalElem = document.getElementById('grandTotal');
 
+    const locationModal = document.getElementById('locationModal');
+    const locationTableBody = document.querySelector('#locationTable tbody');
+    const modalPartNo = document.getElementById('modalPartNo');
+    const modalPartDesc = document.getElementById('modalPartDesc');
+    const closeBtn = document.querySelector('.close-btn');
+
     // Function to fetch and update inventory
     async function fetchInventory(category) {
         inventoryTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
@@ -46,7 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td class="part-no">${item.PART_NO}</td>
                 <td>${item.DESCRIPTION || '-'}</td>
-                <td style="font-weight:bold;">${Math.round(item.TOTAL_ONHAND || 0).toLocaleString()}</td>
+                <td style="font-weight:bold;">
+                    <span class="on-hand-link" 
+                          data-part-no="${item.PART_NO}" 
+                          data-desc="${item.DESCRIPTION || ''}">
+                        ${Math.round(item.TOTAL_ONHAND || 0).toLocaleString()}
+                    </span>
+                </td>
                 <td style="color:#2563eb;">${Math.round(item.TOTAL_PR || 0).toLocaleString()}</td>
                 <td style="color:#7c3aed;">${Math.round(item.TOTAL_PO || 0).toLocaleString()}</td>
                 <td><span class="badge ${(parseFloat(item.TOTAL_ONHAND) + parseFloat(item.TOTAL_PR) + parseFloat(item.TOTAL_PO)) > 0 ? 'success' : 'warning'}">
@@ -54,6 +66,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span></td>
             </tr>
         `).join('');
+
+        // Add event listeners to on-hand links
+        document.querySelectorAll('.on-hand-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const partNo = e.target.getAttribute('data-part-no');
+                const desc = e.target.getAttribute('data-desc');
+                showLocationDetail(partNo, desc);
+            });
+        });
+    }
+
+    async function showLocationDetail(partNo, desc) {
+        modalPartNo.textContent = partNo;
+        modalPartDesc.textContent = desc;
+        locationTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+        locationModal.style.display = 'block';
+
+        try {
+            const response = await fetch(`api/get_inventory_locations.php?part_no=${encodeURIComponent(partNo)}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    locationTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">ไม่พบข้อมูล Location</td></tr>';
+                } else {
+                    locationTableBody.innerHTML = result.data.map(loc => `
+                        <tr>
+                            <td style="font-family:monospace; font-weight:bold;">${loc.LOCATION_NO}</td>
+                            <td style="color:var(--text-secondary);">${loc.LOCATION_NAME || '-'}</td>
+                            <td style="text-align:right; font-weight:700;">${Math.round(loc.TOTAL_ONHAND).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            } else {
+                locationTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">Error: ${result.message}</td></tr>`;
+            }
+        } catch (error) {
+            locationTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">ไม่สามารถเชื่อมต่อ API ได้</td></tr>';
+        }
     }
 
     function updateSummary(summary) {
@@ -63,6 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         totalPRElem.textContent = Math.round(summary.totalPR).toLocaleString();
         totalPOElem.textContent = Math.round(summary.totalPO).toLocaleString();
         grandTotalElem.textContent = Math.round(summary.grandTotal).toLocaleString();
+    }
+
+    // Modal Close logic
+    closeBtn.onclick = () => locationModal.style.display = 'none';
+    window.onclick = (e) => {
+        if (e.target == locationModal) locationModal.style.display = 'none';
     }
 
     // sync filters if one changes (optional design choice)
@@ -79,5 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial load
-    fetchInventory('');
+    fetchInventory('11');
 });
+
