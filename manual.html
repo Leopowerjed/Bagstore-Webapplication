@@ -153,7 +153,7 @@
     <main class="manual-container">
         <div class="page-header" style="margin-bottom: 30px;">
             <h1>📝 จัดการข้อมูล Manual Data</h1>
-            <p style="color: grey;">บันทึกข้อมูลและตรวจสอบประวัติการสแกน QR Code / บันทึกเอง</p>
+            <p style="color: grey;">บันทึกข้อมูลรายการที่ยังไม่สามารถทำรายการในระบบ IFS ได้</p>
         </div>
 
         <!-- Tabs Section -->
@@ -167,9 +167,9 @@
             <div class="form-card glass">
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h3 style="margin:0;">🔍 ค้นหา PR เพื่อทำรายการ</h3>
+                    <h3 style="margin:0;">🔍 ค้นหา PR หรือ PO เพื่อทำรายการ</h3>
                     <div class="search-box" style="display: flex; gap: 10px;">
-                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR (REQUISITION_NO)"
+                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR หรือ PO No."
                             style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 250px;">
                         <button id="searchPrBtn" class="submit-btn" style="padding: 10px 30px;">ค้นหา</button>
                     </div>
@@ -178,7 +178,7 @@
                 <div id="prResultsSection" style="display: none;">
                     <div
                         style="background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
-                        <h4 style="margin: 0; color: #1e40af;">รายการใน PR No: <span id="displayPrNo"></span></h4>
+                        <h4 style="margin: 0; color: #1e40af;">รายการสำหรับ: <span id="displayPrNo"></span></h4>
                     </div>
                     <div style="overflow-x: auto;">
                         <table class="data-table small" id="prItemsTable">
@@ -186,6 +186,8 @@
                                 <tr>
                                     <th>Part No.</th>
                                     <th>Description</th>
+                                    <th>PR No.</th>
+                                    <th>PO No.</th>
                                     <th>Line/Rel</th>
                                     <th>Qty (PR)</th>
                                     <th>Unit</th>
@@ -196,6 +198,32 @@
                             <tbody></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Receipt History Table -->
+            <div class="history-card" style="margin-top: 20px;">
+                <div class="page-header-top" style="margin-bottom: 20px;">
+                    <h3>📜 รายการค้างออกใบรับ</h3>
+                    <button class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="receiptHistoryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px;">วัน/เวลา</th>
+                                <th>Part No.</th>
+                                <th>Description</th>
+                                <th>PR No.</th>
+                                <th>PO No.</th>
+                                <th style="text-align: right;">จำนวน</th>
+                                <th>วันที่รับจริง</th>
+                                <th>Ref.</th>
+                                <th style="width: 170px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -235,14 +263,40 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>หมายเหตุ / สาเหตุที่ค้างจ่าย</label>
-                        <textarea name="note" rows="2" placeholder="เช่น รอใบรับเพื่อตัดจ่าย"></textarea>
+                        <label>Ref. (เหตุผลที่ค้างจ่าย)</label>
+                        <textarea name="note" rows="2" placeholder="ระบุเหตุผล เช่น รอใบรับเพื่อตัดจ่าย"></textarea>
                     </div>
                     <div style="text-align: right; margin-top: 20px;">
                         <button type="submit" class="submit-btn" style="background: #dc2626;">📌
                             บันทึกรายการค้างจ่าย</button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Issue History Table -->
+            <div class="history-card" style="margin-top: 20px;">
+                <div class="page-header-top" style="margin-bottom: 20px;">
+                    <h3>📜 รายการค้างตัดจ่าย</h3>
+                    <button class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="issueHistoryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px;">วัน/เวลา</th>
+                                <th>Part No.</th>
+                                <th>Description</th>
+                                <th>PR No.</th>
+                                <th>PO No.</th>
+                                <th style="text-align: right;">จำนวน</th>
+                                <th>วันที่ต้องการจ่าย</th>
+                                <th>Ref.</th>
+                                <th style="width: 170px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -257,6 +311,8 @@
                     <form id="receiptConfirmForm">
                         <input type="hidden" name="data_type" value="RECEIPT">
                         <input type="hidden" name="requisition_no" id="modalReqNo">
+                        <input type="hidden" name="order_no" id="modalOrderNo">
+                        <input type="hidden" name="po_state" id="modalPoState">
                         <input type="hidden" name="line_no" id="modalLineNo">
                         <input type="hidden" name="release_no" id="modalRelNo">
                         <input type="hidden" name="part_no" id="modalPartNo">
@@ -278,8 +334,8 @@
                             <input type="date" name="delivery_date" class="todayDateInput">
                         </div>
                         <div class="form-group">
-                            <label>หมายเหตุ:</label>
-                            <textarea name="note" rows="2"></textarea>
+                            <label>Ref. (หมายเลขบิลรับของ):</label>
+                            <textarea name="note" rows="2" placeholder="ระบุหมายเลขบิลรับของ"></textarea>
                         </div>
                         <div style="margin-top:20px;">
                             <button type="submit" class="submit-btn" style="width:100%;">💾
@@ -290,35 +346,10 @@
             </div>
         </div>
 
-        <!-- List Section -->
-        <div class="history-card" style="margin-top: 30px;">
-            <div class="page-header-top" style="margin-bottom: 20px;">
-                <h3>📜 ประวัติรายการล่าสุด</h3>
-                <button id="refreshBtn" class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
-            </div>
-            <div style="overflow-x: auto;">
-                <table class="data-table" id="manualTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 150px;">วัน/เวลา</th>
-                            <th style="width: 170px;">สถานะรายการ</th>
-                            <th>ประเภทถุง</th>
-                            <th>รหัสสินค้า (Part No.)</th>
-                            <th style="text-align: right;">จำนวน</th>
-                            <th>วันที่รับจริง/ค้างจ่าย</th>
-                            <th>หมายเหตุ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Loaded via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </main>
 
     <script src="js/navbar.js"></script>
-    <script src="js/manual.js?v=1.6"></script>
+    <script src="js/manual.js?v=3.0"></script>
     <script>
         document.getElementById('todayDate').valueAsDate = new Date();
     </script>

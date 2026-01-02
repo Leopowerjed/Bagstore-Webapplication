@@ -31,13 +31,15 @@ try {
     $note = $input['note'] ?? '';
     $delivery_date = $input['delivery_date'] ?? date('Y-m-d');
     $requisition_no = $input['requisition_no'] ?? null;
+    $order_no = $input['order_no'] ?? null;
+    $po_state = $input['po_state'] ?? null;
     $line_no = $input['line_no'] ?? null;
     $release_no = $input['release_no'] ?? null;
 
-    $sql = "INSERT INTO MANUAL_DATA (data_type, requisition_no, line_no, release_no, bag_type, qr_code, part_no, part_desc, quantity, note, delivery_date) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO MANUAL_DATA (data_type, requisition_no, order_no, po_state, line_no, release_no, bag_type, qr_code, part_no, part_desc, quantity, note, delivery_date) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $params = [$data_type, $requisition_no, $line_no, $release_no, $bag_type, $qr_code, $part_no, $part_desc, $quantity, $note, $delivery_date];
+    $params = [$data_type, $requisition_no, $order_no, $po_state, $line_no, $release_no, $bag_type, $qr_code, $part_no, $part_desc, $quantity, $note, $delivery_date];
 
     $stmt = $db->query($sql, $params);
 

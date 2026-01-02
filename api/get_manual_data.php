@@ -9,7 +9,7 @@ try {
 
     $bag_type = $_GET['bag_type'] ?? null;
 
-    $sql = "SELECT id, bag_type, qr_code, part_no, part_desc, quantity, note, delivery_date, created_at 
+    $sql = "SELECT id, data_type, requisition_no, order_no, po_state, line_no, release_no, bag_type, qr_code, part_no, part_desc, quantity, note, delivery_date, created_at 
             FROM MANUAL_DATA";
     $params = [];
 

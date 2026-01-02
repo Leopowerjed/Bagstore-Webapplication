@@ -2,10 +2,10 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/IFSConnection.php';
 
-$requisition_no = $_GET['requisition_no'] ?? '';
+$search_term = $_GET['search_term'] ?? $_GET['requisition_no'] ?? '';
 
-if (empty($requisition_no)) {
-    echo json_encode(['status' => 'error', 'message' => 'Missing Requisition No']);
+if (empty($search_term)) {
+    echo json_encode(['status' => 'error', 'message' => 'Missing Search Term (PR or PO No)']);
     exit;
 }
 
@@ -14,9 +14,10 @@ $db = new IFSConnection();
 try {
     $conn = $db->connect();
 
-    // Fetch items related to a PR
+    // Fetch items related to a PR or PO
     $sql = "
         SELECT 
+            pl.REQUISITION_NO,
             pl.PART_NO,
             p.DESCRIPTION as PART_DESCRIPTION,
             pl.LINE_NO, 
@@ -33,17 +34,17 @@ try {
             AND pl.PART_NO = pol.PART_NO 
             AND pl.CONTRACT = pol.CONTRACT
         LEFT JOIN IFSAPP.INVENTORY_PART p ON pl.PART_NO = p.PART_NO AND pl.CONTRACT = p.CONTRACT
-        WHERE pl.REQUISITION_NO = :req_no
+        WHERE (pl.REQUISITION_NO = :search OR pl.ORDER_NO = :search)
         AND pl.CONTRACT IN ('RM', 'RMBP', 'RMOR')
-        ORDER BY pl.LINE_NO, pl.RELEASE_NO
+        ORDER BY pl.REQUISITION_NO, pl.LINE_NO, pl.RELEASE_NO
     ";
 
-    $stmt = $db->query($sql, ['req_no' => $requisition_no]);
+    $stmt = $db->query($sql, ['search' => $search_term]);
     $data = $db->fetchAll($stmt);
 
     echo json_encode([
         'status' => 'success',
-        'requisition_no' => $requisition_no,
+        'search_term' => $search_term,
         'count' => count($data),
         'data' => $data
     ]);
