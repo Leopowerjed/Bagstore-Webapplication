@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/IFSConnection.php';
+require_once __DIR__ . '/../includes/MySQLConnection.php';
 
 // Category to EAN_NO Prefix Mapping
 $mapping = [
@@ -20,10 +21,51 @@ if (empty($category) || !isset($mapping[$category])) {
     $category = '11';
 }
 
-$db = new IFSConnection();
+$ifs = new IFSConnection();
+$mysql = new MySQLConnection();
 
 try {
-    $conn = $db->connect();
+    $ifs_conn = $ifs->connect();
+
+    // 1. Fetch Manual Data from MySQL
+    $manual_data = [];
+    try {
+        $mysql_conn = $mysql->connect();
+        $stmt_manual = $mysql->query("
+            SELECT 
+                part_no, 
+                data_type, 
+                CASE WHEN (order_no IS NOT NULL AND order_no != '') THEN 1 ELSE 0 END as has_po,
+                SUM(quantity) as total_qty 
+            FROM MANUAL_DATA 
+            GROUP BY part_no, data_type, CASE WHEN (order_no IS NOT NULL AND order_no != '') THEN 1 ELSE 0 END
+        ");
+        $manual_rows = $mysql->fetchAll($stmt_manual);
+
+        foreach ($manual_rows as $m_row) {
+            $p = $m_row['part_no'];
+            if (!isset($manual_data[$p])) {
+                $manual_data[$p] = [
+                    'manual_receipt_pr' => 0,
+                    'manual_receipt_po' => 0,
+                    'manual_issue' => 0
+                ];
+            }
+
+            if ($m_row['data_type'] === 'RECEIPT') {
+                if ($m_row['has_po'] == 1) {
+                    $manual_data[$p]['manual_receipt_po'] += (float) $m_row['total_qty'];
+                } else {
+                    $manual_data[$p]['manual_receipt_pr'] += (float) $m_row['total_qty'];
+                }
+            } elseif ($m_row['data_type'] === 'ISSUE') {
+                $manual_data[$p]['manual_issue'] += (float) $m_row['total_qty'];
+            }
+        }
+    } catch (Exception $me) {
+        // Fallback or log error
+        error_log("MySQL Manual Data Error: " . $me->getMessage());
+    }
 
     // Default part no filter for all bag categories
     $categoryWhere = "AND p.PART_NO LIKE '25A%' AND p.EAN_NO LIKE :ean";
@@ -124,35 +166,51 @@ try {
     ";
 
     // Global limit for initial view
-    $sql = "SELECT * FROM ($sql) WHERE ROWNUM <= 200";
+    $sql_paginated = "SELECT * FROM ($sql) WHERE ROWNUM <= 200";
 
-    $stmt = $db->query($sql, $params);
-    $data = $db->fetchAll($stmt);
+    $stmt = $ifs->query($sql_paginated, $params);
+    $ifs_data = $ifs->fetchAll($stmt);
 
-    // Calculate Grand Totals for summary
-    $summary = [
-        'totalOnhand' => 0,
-        'totalPR' => 0,
-        'totalPO' => 0,
-        'grandTotal' => 0
-    ];
+    $processed_data = [];
+    foreach ($ifs_data as $row) {
+        $p = $row['PART_NO'];
+        $m = $manual_data[$p] ?? ['manual_receipt_pr' => 0, 'manual_receipt_po' => 0, 'manual_issue' => 0];
 
-    foreach ($data as $row) {
-        $onhand = (float) $row['TOTAL_ONHAND'];
-        $pr = (float) $row['TOTAL_PR'];
-        $po = (float) $row['TOTAL_PO'];
+        $row['MANUAL_RECEIPT_PR'] = (float) $m['manual_receipt_pr'];
+        $row['MANUAL_RECEIPT_PO'] = (float) $m['manual_receipt_po'];
+        $row['MANUAL_ISSUE'] = (float) $m['manual_issue'];
 
-        $summary['totalOnhand'] += $onhand;
-        $summary['totalPR'] += $pr;
-        $summary['totalPO'] += $po;
+        // Remove from manual list once matched so we can see what's left
+        unset($manual_data[$p]);
+
+        $processed_data[] = $row;
     }
-    $summary['grandTotal'] = $summary['totalOnhand'] + $summary['totalPR'] + $summary['totalPO'];
 
+    // Add manual-only items (if any match the category prefix indirectly)
+    // For simplicity, we only add them if they start with 25A and match EAN logic 
+    // but fetching EAN for them would require more IFS calls.
+    // Let's just append remaining ones that were manually recorded but had no IFS activity.
+    foreach ($manual_data as $p => $m) {
+        if (strpos($p, '25A') === 0) {
+            $processed_data[] = [
+                'PART_NO' => $p,
+                'DESCRIPTION' => 'Manual Recorded Item',
+                'TOTAL_ONHAND' => 0,
+                'TOTAL_PR' => 0,
+                'TOTAL_PO' => 0,
+                'MANUAL_RECEIPT_PR' => (float) $m['manual_receipt_pr'],
+                'MANUAL_RECEIPT_PO' => (float) $m['manual_receipt_po'],
+                'MANUAL_ISSUE' => (float) $m['manual_issue']
+            ];
+        }
+    }
+
+    // Calculate Grand Totals based on current visibility (default summary using IFS only for now, 
+    // or let JS calculate summary based on toggle)
     echo json_encode([
         'status' => 'success',
-        'count' => count($data),
-        'summary' => $summary,
-        'data' => $data
+        'count' => count($processed_data),
+        'data' => $processed_data
     ]);
 
 } catch (Exception $e) {

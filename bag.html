@@ -67,6 +67,15 @@
                         <option value="22">8.) ถุงปูนซีเมนต์ส่งออก (PP)</option>
                         <option value="33">9.) ถุงปูนมอร์ตาร์ส่งออก (PP+กระดาษ)</option>
                     </select>
+
+                    <div class="toggle-container"
+                        style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 0 15px; border-radius: 12px; border: 1px solid #e2e8f0; height: 45px;">
+                        <span style="font-weight: 600; font-size: 14px; color: #475569;">รวมรายการ Manual</span>
+                        <label class="switch">
+                            <input type="checkbox" id="includeManualToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div style="overflow-x: auto;">
@@ -177,7 +186,7 @@
     </main>
 
     <script src="js/navbar.js"></script>
-    <script src="js/bag.js?v=1.1"></script>
+    <script src="js/bag.js?v=1.3"></script>
 </body>
 
 </html>
