@@ -187,21 +187,56 @@ try {
     }
 
     // Add manual-only items (if any match the category prefix indirectly)
-    // For simplicity, we only add them if they start with 25A and match EAN logic 
-    // but fetching EAN for them would require more IFS calls.
-    // Let's just append remaining ones that were manually recorded but had no IFS activity.
-    foreach ($manual_data as $p => $m) {
-        if (strpos($p, '25A') === 0) {
-            $processed_data[] = [
-                'PART_NO' => $p,
-                'DESCRIPTION' => 'Manual Recorded Item',
-                'TOTAL_ONHAND' => 0,
-                'TOTAL_PR' => 0,
-                'TOTAL_PO' => 0,
-                'MANUAL_RECEIPT_PR' => (float) $m['manual_receipt_pr'],
-                'MANUAL_RECEIPT_PO' => (float) $m['manual_receipt_po'],
-                'MANUAL_ISSUE' => (float) $m['manual_issue']
-            ];
+    // We only include remaining manual items if they match the CURRENT category's EAN prefix
+    if (!empty($manual_data)) {
+        $manual_part_nos = array_keys($manual_data);
+
+        // Build a query to check matching parts in IFS for the current category
+        $part_placeholders = implode(',', array_fill(0, count($manual_part_nos), '?'));
+        // Note: Oracle uses :p1, :p2 format or we can use positional if library supports it.
+        // Our IFSConnection seems to use named parameters. Let's use a simpler approach.
+
+        // Fetch only those parts from the unmatched manual list that belong to this category
+        $sql_lookup = "
+            SELECT PART_NO, DESCRIPTION 
+            FROM IFSAPP.INVENTORY_PART 
+            WHERE PART_NO LIKE '25A%' 
+            AND EAN_NO LIKE :ean 
+            AND PART_NO IN (
+        ";
+
+        // Handle IN clause manually for simplicity in this context
+        $lookup_params = ['ean' => $mapping[$category]];
+        $i = 1;
+        $in_clause = [];
+        foreach ($manual_part_nos as $mp) {
+            $key = 'p' . $i++;
+            $in_clause[] = ':' . $key;
+            $lookup_params[$key] = $mp;
+        }
+        $sql_lookup .= implode(',', $in_clause) . ")";
+
+        try {
+            $stmt_lookup = $ifs->query($sql_lookup, $lookup_params);
+            $matched_manual_parts = $ifs->fetchAll($stmt_lookup);
+
+            foreach ($matched_manual_parts as $matched) {
+                $p = $matched['PART_NO'];
+                $m = $manual_data[$p];
+                $processed_data[] = [
+                    'PART_NO' => $p,
+                    'DESCRIPTION' => $matched['DESCRIPTION'] ?? 'Manual Recorded Item',
+                    'TOTAL_ONHAND' => 0,
+                    'TOTAL_PR' => 0,
+                    'TOTAL_PO' => 0,
+                    'MANUAL_RECEIPT_PR' => (float) $m['manual_receipt_pr'],
+                    'MANUAL_RECEIPT_PO' => (float) $m['manual_receipt_po'],
+                    'MANUAL_ISSUE' => (float) $m['manual_issue']
+                ];
+            }
+        } catch (Exception $e_lookup) {
+            // If lookup fails, we skip manual-only items to avoid polluting other categories
+            error_log("Manual-only Lookup Error: " . $e_lookup->getMessage());
         }
     }
 

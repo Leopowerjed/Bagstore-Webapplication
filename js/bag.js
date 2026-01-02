@@ -91,8 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
                               data-desc="${item.DESCRIPTION || ''}">
                             ${Math.round(onhand).toLocaleString()}
                         </span>
-                        ${showManual && (item.MANUAL_RECEIPT_PR > 0 || item.MANUAL_RECEIPT_PO > 0 || item.MANUAL_ISSUE > 0) ?
-                    `<div style="font-size:10px; color:#059669; font-weight:normal;">(IFS: ${Math.round(item.TOTAL_ONHAND).toLocaleString()})</div>` : ''}
                     </td>
                     <td>
                         <span class="pr-link" 
