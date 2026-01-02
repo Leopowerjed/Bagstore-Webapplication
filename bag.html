@@ -22,20 +22,7 @@
         <!-- Summary Statistics -->
         <section class="page-header">
             <div class="page-header-top">
-                <h2>📦 สรุปปริมาณถุง (PR & PO)</h2>
-                <div class="filter-box">
-                    <select id="bagTypeFilter">
-                        <option value="11">1.) ถุงปูนซีเมนต์ในประเทศ (กระดาษ)</option>
-                        <option value="21">2.) ถุงปูนซีเมนต์ในประเทศ (PP)</option>
-                        <option value="23">3.) ถุงปูนมอร์ตาร์ (PP)</option>
-                        <option value="13">4.) ถุงปูนมอร์ตาร์ (กระดาษ)</option>
-                        <option value="43">5.) ถุงปูนมอร์ตาร์ (ฟิล์ม)</option>
-                        <option value="52">6.) ถุงปูนซีเมนต์ส่งออก (เย็บเชือก)</option>
-                        <option value="32">7.) ถุงปูนซีเมนต์ส่งออก (PP+กระดาษ)</option>
-                        <option value="22">8.) ถุงปูนซีเมนต์ส่งออก (PP)</option>
-                        <option value="33">9.) ถุงปูนมอร์ตาร์ส่งออก (PP+กระดาษ)</option>
-                    </select>
-                </div>
+                <h2 id="summaryTitle">📦 สรุปปริมาณถุง (PR & PO)</h2>
             </div>
 
             <section class="stat">
@@ -61,12 +48,18 @@
         <!-- Table Placeholder -->
         <section class="table-container">
             <div class="page-header-top" style="margin-bottom: 15px;">
-                <h3>📊 รายการสินค้าคงคลัง</h3>
-                <div class="filter-box">
+                <h3>📊 รายงานปริมาณถุงปูนคงเหลือและ PR&PO</h3>
+                <div class="filter-box" style="display: flex; gap: 15px; align-items: center;">
+                    <div class="search-input-group">
+                        <input type="text" id="inventorySearch" placeholder="🔍 ค้นหา Part No. / รายการ..."
+                            style="padding: 12px 20px; border-radius: 12px; border: 1px solid #e2e8f0; width: 300px; font-family: var(--font-family);">
+                    </div>
+                    <label for="inventoryCategoryFilter"
+                        style="font-weight: 500; color: var(--text-secondary); margin-left: 10px;">ประเภทถุง:</label>
                     <select id="inventoryCategoryFilter">
-                        <option value="11">1.) ถุงปูนซีเมนต์ในประเทศ (กระดาษ)</option>
+                        <option value="11" class="freq-option">⭐ 1.) ถุงปูนซีเมนต์ในประเทศ (กระดาษ)</option>
                         <option value="21">2.) ถุงปูนซีเมนต์ในประเทศ (PP)</option>
-                        <option value="23">3.) ถุงปูนมอร์ตาร์ (PP)</option>
+                        <option value="23" class="freq-option">⭐ 3.) ถุงปูนมอร์ตาร์ (PP)</option>
                         <option value="13">4.) ถุงปูนมอร์ตาร์ (กระดาษ)</option>
                         <option value="43">5.) ถุงปูนมอร์ตาร์ (ฟิล์ม)</option>
                         <option value="52">6.) ถุงปูนซีเมนต์ส่งออก (เย็บเชือก)</option>
@@ -80,8 +73,8 @@
                 <table class="data-table" id="inventoryTable">
                     <thead>
                         <tr>
-                            <th>รหัสสินค้า</th>
-                            <th>รายการ</th>
+                            <th>Part No.</th>
+                            <th>Part Description</th>
                             <th>คงเหลือ (On-hand)</th>
                             <th>PR (Requisition)</th>
                             <th>PO (Order)</th>
@@ -107,6 +100,9 @@
                         <span id="modalPartNo" class="modal-part-no"></span>
                         <p id="modalPartDesc" class="modal-part-desc"></p>
                     </div>
+
+                    <!-- Group Summary Section -->
+                    <div id="locationGroupSummary" class="group-summary-container"></div>
                     <table class="data-table small" id="locationTable">
                         <thead>
                             <tr>
@@ -169,7 +165,7 @@
                                 <th>วันที่เปิด</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">ยอดเต็ม</th>
-                                <th style="text-align:right;">คงเหลือ</th>
+                                <th style="text-align:right;">ค้างส่ง</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -181,7 +177,7 @@
     </main>
 
     <script src="js/navbar.js"></script>
-    <script src="js/bag.js"></script>
+    <script src="js/bag.js?v=1.1"></script>
 </body>
 
 </html>

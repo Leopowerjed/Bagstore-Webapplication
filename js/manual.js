@@ -1,0 +1,223 @@
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Shared Elements
+    const manualTableBody = document.querySelector('#manualTable tbody');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // Receipt Tab Elements
+    const prSearchInput = document.getElementById('prSearchInput');
+    const searchPrBtn = document.getElementById('searchPrBtn');
+    const prResultsSection = document.getElementById('prResultsSection');
+    const prItemsTableBody = document.querySelector('#prItemsTable tbody');
+    const displayPrNo = document.getElementById('displayPrNo');
+
+    // Modal Elements
+    const receiptModal = document.getElementById('receiptModal');
+    const receiptConfirmForm = document.getElementById('receiptConfirmForm');
+
+    // Issue Tab Elements
+    const issueForm = document.getElementById('issueDataForm');
+
+    // Date Init
+    const todayInputs = document.querySelectorAll('.todayDateInput');
+    todayInputs.forEach(input => {
+        input.valueAsDate = new Date();
+    });
+
+    // Check URL Hash to open tab
+    const hash = window.location.hash;
+    if (hash === '#issueTab') {
+        openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(2)') }, 'issueTab');
+    } else if (hash === '#receiptTab') {
+        openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(1)') }, 'receiptTab');
+    }
+
+    const bagTypeMap = {
+        '11': 'ถุงปูนซีเมนต์ในประเทศ (กระดาษ)',
+        '21': 'ถุงปูนซีเมนต์ในประเทศ (PP)',
+        '23': 'ถุงปูนมอร์ตาร์ (PP)',
+        '13': 'ถุงปูนมอร์ตาร์ (กระดาษ)',
+        '43': 'ถุงปูนมอร์ตาร์ (ฟิล์ม)',
+        '52': 'ถุงปูนซีเมนต์ส่งออก (เย็บเชือก)',
+        '32': 'ถุงปูนซีเมนต์ส่งออก (PP+กระดาษ)',
+        '22': 'ถุงปูนซีเมนต์ส่งออก (PP)',
+        '33': 'ถุงปูนมอร์ตาร์ส่งออก (PP+กระดาษ)'
+    };
+
+    // --- Tab 1: Receipt Logic ---
+    searchPrBtn.addEventListener('click', async () => {
+        const reqNo = prSearchInput.value.trim();
+        if (!reqNo) {
+            alert('กรุณากรอกเลขที่ PR');
+            return;
+        }
+
+        searchPrBtn.disabled = true;
+        searchPrBtn.textContent = 'กำลังค้นหา...';
+        prItemsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">กำลังดึงข้อมูลจาก IFS...</td></tr>';
+
+        try {
+            const response = await fetch(`api/get_pr_items.php?requisition_no=${encodeURIComponent(reqNo)}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    prItemsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบรายการใน PR นี้</td></tr>';
+                } else {
+                    displayPrNo.textContent = reqNo;
+                    prResultsSection.style.display = 'block';
+                    prItemsTableBody.innerHTML = result.data.map(item => `
+                        <tr>
+                            <td style="font-weight:600;">${item.PART_NO}</td>
+                            <td style="font-size:12px;">${item.PART_DESCRIPTION || '-'}</td>
+                            <td style="font-family:monospace;">${item.LINE_NO}/${item.RELEASE_NO}</td>
+                            <td style="text-align:right; font-weight:700;">${parseFloat(item.ORIGINAL_QTY).toLocaleString()}</td>
+                            <td>${item.UNIT_MEAS}</td>
+                            <td><span class="badge ${item.STATE === 'Authorized' ? 'success' : ''}">${item.STATE}</span></td>
+                            <td>
+                                <button class="submit-btn" style="padding:5px 10px; font-size:12px;" onclick="openReceiptModal('${reqNo}', '${item.LINE_NO}', '${item.RELEASE_NO}', '${item.PART_NO}', '${item.PART_DESCRIPTION.replace(/'/g, "\\'")}', ${item.ORIGINAL_QTY})">ออกใบรับ</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + result.message);
+                prItemsTableBody.innerHTML = '';
+            }
+        } catch (error) {
+            alert('ไม่สามารถเชื่อมต่อ API ได้');
+        } finally {
+            searchPrBtn.disabled = false;
+            searchPrBtn.textContent = 'ค้นหา';
+        }
+    });
+
+    window.openReceiptModal = (reqNo, line, rel, partNo, desc, qty) => {
+        document.getElementById('modalReqNo').value = reqNo;
+        document.getElementById('modalLineNo').value = line;
+        document.getElementById('modalRelNo').value = rel;
+        document.getElementById('modalPartNo').value = partNo;
+        document.getElementById('modalPartDesc').value = desc;
+        document.getElementById('modalQty').value = qty;
+
+        document.getElementById('displayModalPartNo').textContent = `${partNo} - ${desc}`;
+        document.getElementById('displayPrQty').textContent = parseFloat(qty).toLocaleString();
+
+        receiptModal.style.display = 'block';
+    };
+
+    window.closeReceiptModal = () => {
+        receiptModal.style.display = 'none';
+    };
+
+    receiptConfirmForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(receiptConfirmForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('api/save_manual_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                alert('บันทึกใบรับเรียบร้อยแล้ว');
+                closeReceiptModal();
+                fetchManualData();
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + result.message);
+            }
+        } catch (error) {
+            alert('ไม่สามารถบันทึกข้อมูลได้');
+        }
+    });
+
+    // --- Tab 2: Issue Logic ---
+    issueForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(issueForm);
+        const data = Object.fromEntries(formData.entries());
+
+        if (!data.part_no || data.quantity <= 0) {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+
+        try {
+            const response = await fetch('api/save_manual_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                alert('บันทึกรายการค้างจ่ายเรียบร้อยแล้ว');
+                issueForm.reset();
+                todayInputs.forEach(input => input.valueAsDate = new Date());
+                fetchManualData();
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + result.message);
+            }
+        } catch (error) {
+            alert('ไม่สามารถบันทึกข้อมูลได้');
+        }
+    });
+
+    // --- Shared: History Logic ---
+    async function fetchManualData() {
+        manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+        try {
+            const response = await fetch('api/get_manual_data.php');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
+                } else {
+                    manualTableBody.innerHTML = result.data.map(row => {
+                        const isReceipt = row.data_type === 'RECEIPT';
+                        const typeLabel = isReceipt ? '📥 ใบรับ' : '📤 ค้างจ่าย';
+                        const typeClass = isReceipt ? 'success' : 'danger';
+                        const ref = row.requisition_no ? `<br><small style="color:grey;">PR: ${row.requisition_no}</small>` : '';
+
+                        return `
+                            <tr>
+                                <td style="font-size:11px; color:grey;">${row.created_at}</td>
+                                <td><span class="badge ${typeClass}">${typeLabel}</span></td>
+                                <td style="font-size:12px;">${row.bag_type ? bagTypeMap[row.bag_type] : '-'}</td>
+                                <td style="font-family:monospace; font-weight:600;">${row.part_no}${ref}</td>
+                                <td style="text-align:right; font-weight:700; color:${isReceipt ? '#059669' : '#dc2626'};">
+                                    ${parseFloat(row.quantity).toLocaleString()}
+                                </td>
+                                <td>${row.delivery_date}</td>
+                                <td style="font-size:12px;">${row.note || '-'}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        } catch (error) {
+            manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading history</td></tr>';
+        }
+    }
+
+    refreshBtn.addEventListener('click', fetchManualData);
+    fetchManualData();
+});
