@@ -64,12 +64,23 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .submit-btn:hover {
             background: #1d4ed8;
             transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
         }
 
         .history-card {
@@ -140,22 +151,9 @@
     <div id="navbar"></div>
 
     <main class="manual-container">
-        <div class="page-header" style="margin-bottom: 20px;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-                <div>
-                    <h1>📝 จัดการข้อมูล Manual Data</h1>
-                    <p style="color: grey;">บันทึกข้อมูลและตรวจสอบประวัติการสแกน QR Code / บันทึกเอง</p>
-                </div>
-                <div class="search-box glass"
-                    style="display: flex; gap: 10px; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; background: white;">
-                    <div class="form-group" style="margin:0;">
-                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR (REQUISITION_NO)"
-                            style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 250px;">
-                    </div>
-                    <button id="searchPrBtn" class="submit-btn" style="padding: 10px 30px;">ค้นหา</button>
-                </div>
-            </div>
+        <div class="page-header" style="margin-bottom: 30px;">
+            <h1>📝 จัดการข้อมูล Manual Data</h1>
+            <p style="color: grey;">บันทึกข้อมูลและตรวจสอบประวัติการสแกน QR Code / บันทึกเอง</p>
         </div>
 
         <!-- Tabs Section -->
@@ -167,6 +165,16 @@
         <!-- Receipt Tab Content -->
         <div id="receiptTab" class="tab-content active">
             <div class="form-card glass">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <h3 style="margin:0;">🔍 ค้นหา PR เพื่อทำรายการ</h3>
+                    <div class="search-box" style="display: flex; gap: 10px;">
+                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR (REQUISITION_NO)"
+                            style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 250px;">
+                        <button id="searchPrBtn" class="submit-btn" style="padding: 10px 30px;">ค้นหา</button>
+                    </div>
+                </div>
+
                 <div id="prResultsSection" style="display: none;">
                     <div
                         style="background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
@@ -283,21 +291,21 @@
         </div>
 
         <!-- List Section -->
-        <div class="history-card">
+        <div class="history-card" style="margin-top: 30px;">
             <div class="page-header-top" style="margin-bottom: 20px;">
                 <h3>📜 ประวัติรายการล่าสุด</h3>
-                <button id="refreshBtn" class="refresh-btn">🔄 รีเฟรช</button>
+                <button id="refreshBtn" class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
             </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="manualTable">
                     <thead>
                         <tr>
-                            <th>วัน/เวลาที่บันทึก</th>
+                            <th style="width: 150px;">วัน/เวลา</th>
+                            <th style="width: 170px;">สถานะรายการ</th>
                             <th>ประเภทถุง</th>
-                            <th>QR Code</th>
-                            <th>Part No.</th>
-                            <th>จำนวน</th>
-                            <th>วันที่รับ</th>
+                            <th>รหัสสินค้า (Part No.)</th>
+                            <th style="text-align: right;">จำนวน</th>
+                            <th>วันที่รับจริง/ค้างจ่าย</th>
                             <th>หมายเหตุ</th>
                         </tr>
                     </thead>
@@ -310,7 +318,7 @@
     </main>
 
     <script src="js/navbar.js"></script>
-    <script src="js/manual.js"></script>
+    <script src="js/manual.js?v=1.6"></script>
     <script>
         document.getElementById('todayDate').valueAsDate = new Date();
     </script>

@@ -14,8 +14,6 @@ function openTab(evt, tabName) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // Shared Elements
-    const manualTableBody = document.querySelector('#manualTable tbody');
-    const refreshBtn = document.getElementById('refreshBtn');
 
     // Receipt Tab Elements
     const prSearchInput = document.getElementById('prSearchInput');
@@ -37,13 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
         input.valueAsDate = new Date();
     });
 
-    // Check URL Hash to open tab
-    const hash = window.location.hash;
-    if (hash === '#issueTab') {
-        openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(2)') }, 'issueTab');
-    } else if (hash === '#receiptTab') {
-        openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(1)') }, 'receiptTab');
+    // Function to handle tab switching based on URL hash
+    function handleHashTab() {
+        const hash = window.location.hash;
+        if (hash === '#issueTab') {
+            openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(2)') }, 'issueTab');
+        } else if (hash === '#receiptTab' || !hash) {
+            openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(1)') }, 'receiptTab');
+        }
     }
+
+    // Check URL Hash on load
+    handleHashTab();
+
+    // Listen for hash changes (e.g., from Navbar dropdown)
+    window.addEventListener('hashchange', handleHashTab);
 
     const bagTypeMap = {
         '11': 'ถุงปูนซีเมนต์ในประเทศ (กระดาษ)',
@@ -79,19 +85,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     displayPrNo.textContent = reqNo;
                     prResultsSection.style.display = 'block';
-                    prItemsTableBody.innerHTML = result.data.map(item => `
-                        <tr>
-                            <td style="font-weight:600;">${item.PART_NO}</td>
-                            <td style="font-size:12px;">${item.PART_DESCRIPTION || '-'}</td>
-                            <td style="font-family:monospace;">${item.LINE_NO}/${item.RELEASE_NO}</td>
-                            <td style="text-align:right; font-weight:700;">${parseFloat(item.ORIGINAL_QTY).toLocaleString()}</td>
-                            <td>${item.UNIT_MEAS}</td>
-                            <td><span class="badge ${item.STATE === 'Authorized' ? 'success' : ''}">${item.STATE}</span></td>
-                            <td>
-                                <button class="submit-btn" style="padding:5px 10px; font-size:12px;" onclick="openReceiptModal('${reqNo}', '${item.LINE_NO}', '${item.RELEASE_NO}', '${item.PART_NO}', '${item.PART_DESCRIPTION.replace(/'/g, "\\'")}', ${item.ORIGINAL_QTY})">ออกใบรับ</button>
-                            </td>
-                        </tr>
-                    `).join('');
+                    console.log("PR Items Data:", result.data);
+                    prItemsTableBody.innerHTML = result.data.map(item => {
+                        let statusHtml = '';
+                        // Status logic based on user requirements
+                        if (!item.ORDER_NO) {
+                            statusHtml = '<span class="badge danger">รอ PO</span>';
+                        } else if (item.PO_STATE === 'Stopped') {
+                            statusHtml = '<span class="badge danger">PO.Stopped</span>';
+                        } else {
+                            statusHtml = '<span class="badge info" style="background: #e0f2fe; color: #0369a1;">กรุณาออกใบรับ</span>';
+                        }
+
+                        return `
+                            <tr>
+                                <td style="font-weight:600;">${item.PART_NO}</td>
+                                <td style="font-size:12px;">${item.PART_DESCRIPTION || '-'}</td>
+                                <td style="font-family:monospace;">${item.LINE_NO}/${item.RELEASE_NO}</td>
+                                <td style="text-align:right; font-weight:700;">${parseFloat(item.ORIGINAL_QTY).toLocaleString()}</td>
+                                <td>${item.UNIT_MEAS}</td>
+                                <td>${statusHtml}</td>
+                                <td>
+                                    <button class="submit-btn" style="padding:5px 15px; font-size:12px;" onclick="openReceiptModal('${reqNo}', '${item.LINE_NO}', '${item.RELEASE_NO}', '${item.PART_NO}', '${item.PART_DESCRIPTION.replace(/'/g, "\\'")}', ${item.ORIGINAL_QTY})">📝 ทำรายการ</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
                 }
             } else {
                 alert('เกิดข้อผิดพลาด: ' + result.message);
@@ -181,43 +200,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Shared: History Logic ---
-    async function fetchManualData() {
-        manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
+    window.fetchManualData = async function () {
+        const manualTableBody = document.querySelector('#manualTable tbody');
+        if (manualTableBody) manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">กำลังโหลด...</td></tr>';
+
         try {
             const response = await fetch('api/get_manual_data.php');
             const result = await response.json();
 
             if (result.status === 'success') {
                 if (result.data.length === 0) {
-                    manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
+                    if (manualTableBody) manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
                 } else {
-                    manualTableBody.innerHTML = result.data.map(row => {
+                    const rowsHtml = result.data.map(row => {
                         const isReceipt = row.data_type === 'RECEIPT';
-                        const typeLabel = isReceipt ? '📥 ใบรับ' : '📤 ค้างจ่าย';
+                        const typeLabel = isReceipt ? '📥 รับของ (Manual)' : '📤 ค้างส่ง (Pending)';
                         const typeClass = isReceipt ? 'success' : 'danger';
                         const ref = row.requisition_no ? `<br><small style="color:grey;">PR: ${row.requisition_no}</small>` : '';
 
                         return `
                             <tr>
-                                <td style="font-size:11px; color:grey;">${row.created_at}</td>
+                                <td style="font-size:12px; color:var(--text-secondary);">${row.created_at}</td>
                                 <td><span class="badge ${typeClass}">${typeLabel}</span></td>
-                                <td style="font-size:12px;">${row.bag_type ? bagTypeMap[row.bag_type] : '-'}</td>
-                                <td style="font-family:monospace; font-weight:600;">${row.part_no}${ref}</td>
-                                <td style="text-align:right; font-weight:700; color:${isReceipt ? '#059669' : '#dc2626'};">
+                                <td style="font-size:13px;">${row.bag_type && bagTypeMap[row.bag_type] ? bagTypeMap[row.bag_type] : '-'}</td>
+                                <td style="font-family:monospace; font-weight:600; color:var(--accent-color);">${row.part_no}${ref}</td>
+                                <td style="text-align:right; font-weight:700; color:${isReceipt ? '#059669' : '#dc2626'}; font-size:1.1em;">
                                     ${parseFloat(row.quantity).toLocaleString()}
                                 </td>
                                 <td>${row.delivery_date}</td>
-                                <td style="font-size:12px;">${row.note || '-'}</td>
+                                <td style="font-size:13px; color:var(--text-secondary);">${row.note || '-'}</td>
                             </tr>
                         `;
                     }).join('');
+                    if (manualTableBody) manualTableBody.innerHTML = rowsHtml;
                 }
             }
         } catch (error) {
-            manualTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading history</td></tr>';
+            console.error("Error loading history:", error);
         }
     }
 
-    refreshBtn.addEventListener('click', fetchManualData);
     fetchManualData();
 });
