@@ -10,6 +10,10 @@ function openTab(evt, tabName) {
     }
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+
+    if (tabName === 'historyTab' && typeof fetchManualHistory === 'function') {
+        fetchManualHistory();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,17 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Issue Tab Elements
     const issueForm = document.getElementById('issueDataForm');
 
+    // Auto-clean Button logic
+    const cleanManualReceiptsBtn = document.getElementById('cleanManualReceiptsBtn');
+
     // Date Init
     const todayInputs = document.querySelectorAll('.todayDateInput');
     todayInputs.forEach(input => {
         input.valueAsDate = new Date();
     });
 
+    // Also support element with ID todayDate if it exists
+    const todayDateElem = document.getElementById('todayDate');
+    if (todayDateElem) {
+        todayDateElem.valueAsDate = new Date();
+    }
+
     // Function to handle tab switching based on URL hash
     function handleHashTab() {
         const hash = window.location.hash;
         if (hash === '#issueTab') {
             openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(2)') }, 'issueTab');
+        } else if (hash === '#historyTab') {
+            openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(3)') }, 'historyTab');
+            fetchManualHistory();
         } else if (hash === '#receiptTab' || !hash) {
             openTab({ currentTarget: document.querySelector('.tab-btn:nth-child(1)') }, 'receiptTab');
         }
@@ -171,6 +187,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    window.deleteManualData = async (id) => {
+        if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('api/delete_manual_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                fetchManualData();
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + result.message);
+            }
+        } catch (error) {
+            alert('ไม่สามารถลบข้อมูลได้');
+        }
+    };
+
+    // Auto-clean logic
+    if (cleanManualReceiptsBtn) {
+        cleanManualReceiptsBtn.addEventListener('click', async () => {
+            if (!confirm('ต้องการตรวจสอบรายการ Manual กับระบบ IFS หรือไม่?\nระบบจะลบรายการที่พบว่ามีการออกใบรับจริงใน IFS แล้วโดยอ้างอิงจากเลขที่บิล (Ref.)')) {
+                return;
+            }
+
+            cleanManualReceiptsBtn.disabled = true;
+            cleanManualReceiptsBtn.textContent = '⌛ กำลังตรวจสอบ...';
+
+            try {
+                // Step 1: Verify matches
+                const verifyResp = await fetch('api/verify_manual_receipts.php?action=verify');
+                const verifyResult = await verifyResp.json();
+
+                if (verifyResult.status === 'success') {
+                    if (verifyResult.matches && verifyResult.matches.length > 0) {
+                        const count = verifyResult.matches.length;
+                        const details = verifyResult.matches.map(m => `- ${m.part_no} (PO: ${m.order_no}) Ref: ${m.ref}`).join('\n');
+
+                        if (confirm(`พบรายการที่ทำใน IFS แล้ว ${count} รายการ:\n${details}\n\nต้องการลบรายการเหล่านี้ออกจาก Manual Data หรือไม่?`)) {
+                            // Step 2: Clean matches
+                            const cleanResp = await fetch('api/verify_manual_receipts.php?action=clean');
+                            const cleanResult = await cleanResp.json();
+
+                            if (cleanResult.status === 'success') {
+                                alert(`ลบรายการสำเร็จ: ${cleanResult.cleaned_count} รายการ`);
+                                fetchManualData();
+                            } else {
+                                alert('เกิดข้อผิดพลาดในการลบ: ' + cleanResult.message);
+                            }
+                        }
+                    } else {
+                        alert('ไม่พบรายการที่ทำใน IFS แล้ว (ตรวจสอบจากเลขที่บิล)');
+                    }
+                } else {
+                    alert('เกิดข้อผิดพลาดในการตรวจสอบ: ' + verifyResult.message);
+                }
+            } catch (error) {
+                console.error("Verification Error:", error);
+                alert('ไม่สามารถเชื่อมต่อ API ตรวจสอบได้');
+            } finally {
+                cleanManualReceiptsBtn.disabled = false;
+                cleanManualReceiptsBtn.textContent = '🧹 ตรวจสอบและลบรายการที่ทำใน IFS แล้ว';
+            }
+        });
+    }
+
     // --- Tab 2: Issue Logic ---
     issueForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -208,8 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const receiptBody = document.querySelector('#receiptHistoryTable tbody');
         const issueBody = document.querySelector('#issueHistoryTable tbody');
 
-        if (receiptBody) receiptBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">กำลังโหลด...</td></tr>';
-        if (issueBody) issueBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">กำลังโหลด...</td></tr>';
+        if (receiptBody) receiptBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">กำลังโหลด...</td></tr>';
+        if (issueBody) issueBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">กำลังโหลด...</td></tr>';
 
         try {
             const response = await fetch('api/get_manual_data.php');
@@ -220,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const issues = result.data.filter(row => row.data_type === 'ISSUE');
 
                 const renderRows = (data, isReceipt) => {
-                    if (data.length === 0) return '<tr><td colspan="9" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
+                    if (data.length === 0) return '<tr><td colspan="10" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
                     return data.map(row => {
                         let statusHtml = '';
                         if (isReceipt) {
@@ -248,6 +335,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <td>${row.delivery_date}</td>
                                 <td style="font-size:13px; color:var(--text-secondary);">${row.note || '-'}</td>
                                 <td>${statusHtml}</td>
+                                <td style="text-align:center;">
+                                    <button class="btn-delete" title="ลบรายการ" onclick="deleteManualData(${row.id})">🗑️</button>
+                                </td>
                             </tr>
                         `;
                     }).join('');
@@ -255,6 +345,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (receiptBody) receiptBody.innerHTML = renderRows(receipts, true);
                 if (issueBody) issueBody.innerHTML = renderRows(issues, false);
+            }
+        } catch (error) {
+            console.error("Error loading history:", error);
+        }
+    }
+
+    window.fetchManualHistory = async function () {
+        const historyBody = document.querySelector('#archiveHistoryTable tbody');
+        if (historyBody) historyBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">กำลังโหลด...</td></tr>';
+
+        try {
+            const response = await fetch('api/get_manual_history.php');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    if (historyBody) historyBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">ไม่พบข้อมูลประวัติ</td></tr>';
+                    return;
+                }
+
+                if (historyBody) {
+                    historyBody.innerHTML = result.data.map(row => {
+                        return `
+                            <tr>
+                                <td style="font-size:12px; color:#059669;">${row.archived_at}</td>
+                                <td>${row.data_type === 'RECEIPT' ? '<span class="badge info">RECEIPT</span>' : '<span class="badge danger">ISSUE</span>'}</td>
+                                <td style="font-family:monospace; font-weight:600;">${row.part_no}</td>
+                                <td style="font-family:monospace;">${row.requisition_no || '-'}</td>
+                                <td style="font-family:monospace;">${row.order_no || '-'}</td>
+                                <td style="text-align:right; font-weight:700;">${parseFloat(row.quantity).toLocaleString()}</td>
+                                <td style="font-size:12px;">${row.note || '-'}</td>
+                                <td style="font-size:12px; color:var(--text-secondary);">${row.created_at}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
             }
         } catch (error) {
             console.error("Error loading history:", error);

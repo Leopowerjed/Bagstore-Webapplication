@@ -1,0 +1,87 @@
+/* Bag Page Specific Styles */
+
+.m-b-15 {
+    margin-bottom: 15px;
+}
+
+.m-l-10 {
+    margin-left: 10px;
+}
+
+.w-300 {
+    width: 300px;
+}
+
+.search-input-group input {
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-family: var(--font-family);
+}
+
+.category-filter-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    padding: 0 15px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    height: 45px;
+}
+
+.toggle-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #475569;
+}
+
+.grand-total-card {
+    border-left: 4px solid #7c3aed;
+}
+
+.grand-total-value {
+    color: #7c3aed;
+}
+
+.modal-pr-header {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+}
+
+.modal-po-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+}
+
+.text-right {
+    text-align: right;
+}
+
+.display-none {
+    display: none;
+}
+
+/* Responsive adjustments for filters */
+@media (max-width: 1200px) {
+    .filter-box {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .search-input-group,
+    .search-input-group input {
+        width: 100% !important;
+    }
+
+    .filter-box select {
+        width: 100%;
+        min-width: unset;
+    }
+}

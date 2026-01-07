@@ -6,181 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual Data Management - Bagstore</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/manual.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .manual-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .form-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        .submit-btn {
-            background: #2563eb;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .submit-btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-        }
-
-        .history-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Tabs Styling */
-        .tabs-container {
-            display: flex;
-            gap: 5px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .tab-btn {
-            padding: 12px 25px;
-            border: none;
-            background: none;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-
-        .tab-content {
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .refresh-btn {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .history-card .page-header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    </style>
 </head>
 
 <body class="bg-light">
     <div id="navbar"></div>
 
     <main class="manual-container">
-        <div class="page-header" style="margin-bottom: 30px;">
+        <div class="page-header m-b-30">
             <h1>📝 จัดการข้อมูล Manual Data</h1>
-            <p style="color: grey;">บันทึกข้อมูลรายการที่ยังไม่สามารถทำรายการในระบบ IFS ได้</p>
+            <p class="text-grey">บันทึกข้อมูลรายการที่ยังไม่สามารถทำรายการในระบบ IFS ได้</p>
         </div>
 
         <!-- Tabs Section -->
-        <div class="tabs-container" style="margin-bottom: 20px;">
+        <div class="tabs-container m-b-20">
             <button class="tab-btn active" onclick="openTab(event, 'receiptTab')">1. ออกใบรับ (Manual Receipt)</button>
             <button class="tab-btn" onclick="openTab(event, 'issueTab')">2. ค้างทำรายการจ่าย (Pending Issue)</button>
+            <button class="tab-btn" onclick="openTab(event, 'historyTab')">3. ประวัติย้อนหลัง (Archived
+                History)</button>
         </div>
 
         <!-- Receipt Tab Content -->
         <div id="receiptTab" class="tab-content active">
             <div class="form-card glass">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h3 style="margin:0;">🔍 ค้นหา PR หรือ PO เพื่อทำรายการ</h3>
-                    <div class="search-box" style="display: flex; gap: 10px;">
-                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR หรือ PO No."
-                            style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 250px;">
-                        <button id="searchPrBtn" class="submit-btn" style="padding: 10px 30px;">ค้นหา</button>
+                <div class="section-search-header p-20 m-b-25">
+                    <h3 class="m-0">🔍 ค้นหา PR หรือ PO เพื่อทำรายการ</h3>
+                    <div class="search-box">
+                        <input type="text" id="prSearchInput" placeholder="ระบุเลขที่ PR หรือ PO No.">
+                        <button id="searchPrBtn" class="submit-btn p-10-30">ค้นหา</button>
                     </div>
                 </div>
 
                 <div id="prResultsSection" style="display: none;">
-                    <div
-                        style="background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
-                        <h4 style="margin: 0; color: #1e40af;">รายการสำหรับ: <span id="displayPrNo"></span></h4>
+                    <div class="alert-item p-15 m-b-15">
+                        <h4 class="m-0">รายการสำหรับ: <span id="displayPrNo"></span></h4>
                     </div>
-                    <div style="overflow-x: auto;">
+                    <div class="overflow-x-auto">
                         <table class="data-table small" id="prItemsTable">
                             <thead>
                                 <tr>
@@ -202,24 +64,31 @@
             </div>
 
             <!-- Receipt History Table -->
-            <div class="history-card" style="margin-top: 20px;">
-                <div class="page-header-top" style="margin-bottom: 20px;">
+            <div class="history-card m-t-20">
+                <div class="page-header-top m-b-20"
+                    style="display: flex; justify-content: space-between; align-items: center;">
                     <h3>📜 รายการค้างออกใบรับ</h3>
-                    <button class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="submit-btn" id="cleanManualReceiptsBtn"
+                            style="background: var(--accent-color); font-size: 13px; padding: 8px 15px;">🧹
+                            ตรวจสอบและลบรายการที่ทำใน IFS แล้ว</button>
+                        <button class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
+                    </div>
                 </div>
-                <div style="overflow-x: auto;">
+                <div class="overflow-x-auto">
                     <table class="data-table" id="receiptHistoryTable">
                         <thead>
                             <tr>
-                                <th style="width: 150px;">วัน/เวลา</th>
+                                <th class="w-150">วัน/เวลา</th>
                                 <th>Part No.</th>
                                 <th>Description</th>
                                 <th>PR No.</th>
                                 <th>PO No.</th>
-                                <th style="text-align: right;">จำนวน</th>
+                                <th class="text-right">จำนวน</th>
                                 <th>วันที่รับจริง</th>
                                 <th>Ref.</th>
-                                <th style="width: 170px;">Status</th>
+                                <th class="w-170">Status</th>
+                                <th style="text-align:center;">Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -266,32 +135,33 @@
                         <label>Ref. (เหตุผลที่ค้างจ่าย)</label>
                         <textarea name="note" rows="2" placeholder="ระบุเหตุผล เช่น รอใบรับเพื่อตัดจ่าย"></textarea>
                     </div>
-                    <div style="text-align: right; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="background: #dc2626;">📌
+                    <div class="text-right m-t-20">
+                        <button type="submit" class="submit-btn btn-issue">📌
                             บันทึกรายการค้างจ่าย</button>
                     </div>
                 </form>
             </div>
 
             <!-- Issue History Table -->
-            <div class="history-card" style="margin-top: 20px;">
-                <div class="page-header-top" style="margin-bottom: 20px;">
+            <div class="history-card m-t-20">
+                <div class="page-header-top m-b-20">
                     <h3>📜 รายการค้างตัดจ่าย</h3>
                     <button class="refresh-btn" onclick="fetchManualData()">🔄 รีเฟรช</button>
                 </div>
-                <div style="overflow-x: auto;">
+                <div class="overflow-x-auto">
                     <table class="data-table" id="issueHistoryTable">
                         <thead>
                             <tr>
-                                <th style="width: 150px;">วัน/เวลา</th>
+                                <th class="w-150">วัน/เวลา</th>
                                 <th>Part No.</th>
                                 <th>Description</th>
                                 <th>PR No.</th>
                                 <th>PO No.</th>
-                                <th style="text-align: right;">จำนวน</th>
+                                <th class="text-right">จำนวน</th>
                                 <th>วันที่ต้องการจ่าย</th>
                                 <th>Ref.</th>
-                                <th style="width: 170px;">Status</th>
+                                <th class="w-170">Status</th>
+                                <th style="text-align:center;">Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -302,8 +172,8 @@
 
         <!-- Receipt Modal (for confirming quantity) -->
         <div id="receiptModal" class="modal">
-            <div class="modal-content glass" style="max-width: 500px;">
-                <div class="modal-header" style="background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);">
+            <div class="modal-content glass max-w-500">
+                <div class="modal-header modal-receipt-header">
                     <h3>✅ บันทึกการรับสินค้า (Manual Receipt)</h3>
                     <span class="close-btn" onclick="closeReceiptModal()">&times;</span>
                 </div>
@@ -318,18 +188,17 @@
                         <input type="hidden" name="part_no" id="modalPartNo">
                         <input type="hidden" name="part_desc" id="modalPartDesc">
 
-                        <div class="form-group" style="margin-bottom:15px;">
+                        <div class="form-group m-b-15">
                             <label>รหัสสินค้า:</label>
-                            <div id="displayModalPartNo" style="font-weight:700; font-size:1.1em;"></div>
+                            <div id="displayModalPartNo" class="bold-text large-text"></div>
                         </div>
-                        <div class="form-group" style="margin-bottom:15px;">
+                        <div class="form-group m-b-15">
                             <label>จำนวนที่รับจริง:</label>
                             <input type="number" name="quantity" id="modalQty" required
-                                style="font-size:1.2em; font-weight:700; text-align:center;">
-                            <p style="font-size:0.85em; color:grey; margin-top:5px;">จำนวนใน PR: <span
-                                    id="displayPrQty"></span></p>
+                                class="bold-text large-text center-text">
+                            <p class="helper-text">จำนวนใน PR: <span id="displayPrQty"></span></p>
                         </div>
-                        <div class="form-group" style="margin-bottom:15px;">
+                        <div class="form-group m-b-15">
                             <label>วันที่สินค้าเข้า:</label>
                             <input type="date" name="delivery_date" class="todayDateInput">
                         </div>
@@ -337,11 +206,34 @@
                             <label>Ref. (หมายเลขบิลรับของ):</label>
                             <textarea name="note" rows="2" placeholder="ระบุหมายเลขบิลรับของ"></textarea>
                         </div>
-                        <div style="margin-top:20px;">
-                            <button type="submit" class="submit-btn" style="width:100%;">💾
-                                ยืนยันการบันทึกใบรับ</button>
-                        </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab Content -->
+        <div id="historyTab" class="tab-content" style="display: none;">
+            <div class="history-card">
+                <div class="page-header-top m-b-20">
+                    <h3>📜 ประวัติรายการที่ทำใน IFS เรียบร้อยแล้ว (Archived)</h3>
+                    <button class="refresh-btn" onclick="fetchManualHistory()">🔄 รีเฟรช</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="data-table" id="archiveHistoryTable">
+                        <thead>
+                            <tr>
+                                <th class="w-150">ย้ายเมื่อ</th>
+                                <th>ประเภท</th>
+                                <th>Part No.</th>
+                                <th>PR No.</th>
+                                <th>PO No.</th>
+                                <th class="text-right">จำนวน</th>
+                                <th>Ref.</th>
+                                <th class="w-150">บันทึกเมื่อ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -349,10 +241,7 @@
     </main>
 
     <script src="js/navbar.js"></script>
-    <script src="js/manual.js?v=3.0"></script>
-    <script>
-        document.getElementById('todayDate').valueAsDate = new Date();
-    </script>
+    <script src="js/manual.js?v=3.2"></script>
 </body>
 
 </html>
